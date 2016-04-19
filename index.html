@@ -4,6 +4,8 @@
 <head>
 	<title>This is an area</title>
 
+	<script src='http://use.edgefonts.net/butcherman.js'></script>
+
 </head>
 
 <body>
@@ -30,8 +32,8 @@
 }
 
 .area {
-  fill: red;
-  opacity: 0.6;
+  fill: blue;
+  opacity: 0.3;
 }
 
 .line {
@@ -45,15 +47,37 @@
 <script src="//d3js.org/d3.v3.min.js"></script>
 
 <script>
+/*
+	var textsvg = d3.select("body").append("svg")
+		.attr("hight", 100)
+		.attr("width", 960)
+	  .append("text")
+	  	.attr("x", 50)
+	  	.attr("y", 80)
+		.text("Nordea-aktien")
+		.style("font-size", "80px")
+		.style("font-family", "sans-serif");
 
+	var textsvg2 = d3.select("body").append("svg")
+		.attr("height", 100)
+		.attr("width", 960)
+	  .append("text")
+	  	.attr("x", 50)
+	  	.attr("y", 90)
+	  	.text("styrtbløder")
+	  	.style("position", "absolute")
+	  	.style("font-size", "120px")
+	  	.style("font-family", "butcherman")
+	  	.style("fill", "#900000");
+*/
 	//Create margin
-	var margin = {top: 20, right: 20, bottom: 30, left: 50},
+	var margin = {top: 40, right: 20, bottom: 30, left: 50},
     width = 960 - margin.left - margin.right,
-    height = 500 - margin.top - margin.bottom;
+    height = 600 - margin.top - margin.bottom;
 
-	//Create axis scale - Parse the date / time ("%d-%b-%y") or ("%Y-%m-%d") or ("%d-%m-%Y")
+	//Create axis scale - Parse the date / time ("%d-%b-%y") or ("%Y-%m-%d" - Danske) or ("%d-%m-%Y" - Nordea)
 	var parseDate = d3.time.format("%d-%m-%Y").parse;
-		formatDate = d3.time.format("%d-%m"),
+		formatDate = d3.time.format("%d-%m-%Y"),
 		bisectDate = d3.bisector(function(d) { return d.date; }).left;
 
 	var x = d3.time.scale()
@@ -69,7 +93,8 @@
 
 	var yAxis = d3.svg.axis()
 		.scale(y)
-		.orient("left")	
+		.orient("left")
+		.ticks(20);	
 
 	//Create area
 	var area = d3.svg.area()
@@ -94,7 +119,6 @@
 	var focus = svg.append("g") 
 	    .style("display", "none");
 
-
 	d3.csv("nordea_kurs.csv", function(error, data) {
   	if (error) throw error;
   	 	data.forEach(function(d) {
@@ -111,20 +135,15 @@
 	x.domain(d3.extent(data, function(d) { return d.date; }));
   	y.domain([0, d3.max(data, function(d) { return d.close; })]);
 
-  	//Input to line
-  	x.domain(d3.extent(data, function(d) { return d.date; }));
-  	y.domain(d3.extent(data, function(d) { return d.close; }));
-  
+	svg.append("path")
+		.datum(data)
+	  	.attr("class", "area")
+	  	.attr("d", area);
 
 	svg.append("path")
 		.datum(data)
 		.attr("class", "line")
 		.attr("d", line);
-
-	svg.append("path")
-		.datum(data)
-	  	.attr("class", "area")
-	  	.attr("d", area);
 
 	svg.append("g")
 	    .attr("class", "x axis")
@@ -144,18 +163,14 @@
 	// append the x line
     focus.append("line")
         .attr("class", "x")
-        .style("stroke", "blue")
-        .style("stroke-dasharray", "3,3")
-        .style("opacity", 0.5)
+        .style("stroke", "black")
         .attr("y1", 0)
         .attr("y2", height);
 
     // append the y line
     focus.append("line")
         .attr("class", "y")
-        .style("stroke", "blue")
-        .style("stroke-dasharray", "3,3")
-        .style("opacity", 0.5)
+        .style("stroke", "black")
         .attr("x1", width)
         .attr("x2", width);
 
@@ -164,33 +179,32 @@
         .attr("class", "y")
         .style("fill", "black")
         .style("stroke", "black")
-        .attr("r", 10);
+        .attr("r", 4);
 
     // place the value at the intersection
     focus.append("text")
         .attr("class", "y1")
         .style("stroke", "white")
         .style("stroke-width", "3.5px")
-        .style("opacity", 0.8)
         .attr("dx", 8)
         .attr("dy", "-.3em");
     focus.append("text")
         .attr("class", "y2")
         .attr("dx", 8)
-        .attr("dy", "-.3em");
+        .attr("dy", "4em")
+        .style("fill", "black");
 
     // place the date at the intersection
     focus.append("text")
         .attr("class", "y3")
         .style("stroke", "white")
         .style("stroke-width", "3.5px")
-        .style("opacity", 0.8)
         .attr("dx", 8)
         .attr("dy", "1em");
     focus.append("text")
         .attr("class", "y4")
         .attr("dx", 8)
-        .attr("dy", "1em");
+        .attr("dy", "5em");
     
     // append the rectangle to capture mouse
     svg.append("rect")
